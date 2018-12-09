@@ -9,17 +9,26 @@ func TestTodo(t *testing.T) {}
 
 func TestAdd(t *testing.T) {
 	var buf bytes.Buffer
-	input := "testing"
-
-	if err := add(&buf, input); err != nil {
-		t.Error("unexpected error:", err)
-	}
-
-	if expected, actual := "add todo: testing", buf.String(); expected != actual {
-		t.Errorf("greeting message wont %s but got %s", expected, actual)
+	option := "testing"
+	add(&buf, option)
+	if expected, actual := "testing\n", buf.String(); expected != actual {
+		t.Errorf("wont %v but got %v", expected, actual)
 	}
 }
 
-func TestList(t *testing.T) {}
+func TestList(t *testing.T) {
+	buf := bytes.NewBufferString("testing\n")
+	if expected, actual := "testing\n", list(buf); expected != actual {
+		t.Errorf("wont %v but got %v", expected, actual)
+	}
+}
 
-func TestDone(t *testing.T) {}
+func TestDone(t *testing.T) {
+	src := bytes.NewBufferString("1testing\n2testing\n")
+	var dest bytes.Buffer
+	option := "1"
+	done(src, &dest, option)
+	if expected, actual := "2testing\n", dest.String(); expected != actual {
+		t.Errorf("wont %v but got %v", expected, actual)
+	}
+}
