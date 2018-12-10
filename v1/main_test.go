@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-func TestTodo(t *testing.T) {}
-
 func TestAdd(t *testing.T) {
 	var buf bytes.Buffer
 	option := "testing"
