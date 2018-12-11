@@ -23,10 +23,8 @@ func TestList(t *testing.T) {
 
 func TestDone(t *testing.T) {
 	src := bytes.NewBufferString("1testing\n2testing\n")
-	var dest bytes.Buffer
-	option := "1"
-	done(src, &dest, option)
-	if expected, actual := "2testing\n", dest.String(); expected != actual {
+	id := 1
+	if expected, actual := "2testing\n", done(src, id); expected != actual {
 		t.Errorf("wont %v but got %v", expected, actual)
 	}
 }

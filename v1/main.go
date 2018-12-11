@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 const srcFile string = ".todo"
@@ -19,7 +19,7 @@ func main() {
 	listCmd := flag.NewFlagSet("list", flag.ExitOnError)
 
 	addMesPtr := addCmd.String("task", "", "TODO text. (Required)")
-	doneIDPtr := doneCmd.Int("id", "", "Id to done. (Required)")
+	doneIDPtr := doneCmd.Int("id", 0, "Id to done. (Required)")
 
 	if len(os.Args) < 2 {
 		fmt.Println("subcommand is required")
@@ -38,33 +38,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	var msg string
+	// FIXME
 	currentDir, _ := os.Getwd()
 	p := filepath.Join(currentDir, srcFile)
-	f, _ := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
-	defer f.Close()
 
 	if addCmd.Parsed() {
 		if *addMesPtr == "" {
 			addCmd.PrintDefaults()
 			os.Exit(1)
 		}
+		// FIXME
+		f, _ := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+		defer f.Close()
+
 		add(f, *addMesPtr)
-		msg = list(f)
 	}
 	if doneCmd.Parsed() {
-		if *doneIDPtr == "" {
+		if *doneIDPtr == 0 {
 			doneCmd.PrintDefaults()
 			os.Exit(1)
 		}
-		done(f, f, *doneIDPtr)
-		msg = list(f)
-	}
-	if listCmd.Parsed() {
-		msg = list(f)
-	}
+		// FIXME
+		r, _ := os.OpenFile(p, os.O_RDONLY, 0666)
+		defer r.Close()
 
-	fmt.Println(msg)
+		t := done(r, *doneIDPtr)
+		err := ioutil.WriteFile(p, []byte(t), 0644)
+		if err != nil {
+			log.Fatalln(err)
+			os.Exit(1)
+		}
+	}
+	// FIXME
+	f, _ := os.OpenFile(p, os.O_RDONLY, 0666)
+	defer f.Close()
+
+	fmt.Println(list(f))
 }
 
 func add(w io.Writer, option string) {
@@ -76,15 +85,16 @@ func list(r io.Reader) string {
 	return string(buf)
 }
 
-func done(r io.Reader, w io.Writer, option string) {
+func done(r io.Reader, id int) string {
 	scanner := bufio.NewScanner(r)
 	var i int
-	id, _ := strconv.Atoi(option)
+	var t string
 	for scanner.Scan() {
 		i++
 		if i == id {
 			continue
 		}
-		w.Write([]byte(scanner.Text() + "\n"))
+		t = scanner.Text() + "\n"
 	}
+	return t
 }
